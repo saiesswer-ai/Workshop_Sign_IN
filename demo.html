@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Forkline — Sign in</title>
+<meta name="description" content="Sign in or create an account on Forkline." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root{
+    --bg: #0B0E14;
+    --panel: #121722;
+    --panel-2: #161C29;
+    --border: #232A3A;
+    --text: #ECE9E1;
+    --text-muted: #8993A8;
+    --teal: #5FE1C7;
+    --teal-dim: rgba(95, 225, 199, 0.14);
+    --amber: #F2B84B;
+    --amber-dim: rgba(242, 184, 75, 0.14);
+    --radius: 10px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0;
+    min-height: 100%;
+  }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-display);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(24px, 6vw, 64px) 20px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  a{ color: inherit; }
+
+  :focus-visible{
+    outline: 2px solid var(--teal);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* ---------- background scene ---------- */
+
+  .bg-scene{
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .blob{
+    position: absolute;
+    width: 46vw;
+    height: 46vw;
+    max-width: 560px;
+    max-height: 560px;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.16;
+    animation: drift 42s ease-in-out infinite alternate;
+  }
+  .blob--teal{ background: var(--teal); top: -14%; left: -12%; }
+  .blob--amber{ background: var(--amber); bottom: -18%; right: -10%; animation-delay: -14s; }
+
+  @keyframes drift{
+    from{ transform: translate(0, 0) scale(1); }
+    to{ transform: translate(50px, 34px) scale(1.06); }
+  }
+
+  .branches{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .branches path{
+    fill: none;
+    stroke-width: 1.4;
+    opacity: 0.28;
+  }
+  .branches path.teal{ stroke: var(--teal); }
+  .branches path.amber{ stroke: var(--amber); }
+  .branches circle.teal{ fill: var(--teal); }
+  .branches circle.amber{ fill: var(--amber); }
+
+  /* ---------- layout ---------- */
+
+  .stage{
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero{ margin-bottom: 34px; }
+
+  .hero-icon{
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 14px;
+  }
+  .merge-icon .node{ fill: var(--bg); stroke: var(--teal); stroke-width: 3; }
+  .merge-icon .merge-path{
+    fill: none;
+    stroke: var(--teal);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: draw 1s ease-out forwards;
+    animation-delay: 0.15s;
+  }
+  .merge-icon .merge-path--b{ stroke: var(--amber); animation-delay: 0.3s; }
+
+  @keyframes draw{ to{ stroke-dashoffset: 0; } }
+
+  .hero-title{
+    font-size: clamp(2.1rem, 5vw, 2.75rem);
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 12px;
+  }
+  .hero-title .word{
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .hero-title .word:nth-child(1){ animation-delay: 0.35s; }
+  .hero-title .word:nth-child(2){ animation-delay: 0.5s; }
+
+  @keyframes rise{
+    to{ opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-sub{
+    color: var(--text-muted);
+    font-size: 0.98rem;
+    line-height: 1.5;
+    max-width: 38ch;
+    margin: 0 auto;
+    opacity: 0;
+    animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.66s;
+  }
+
+  /* ---------- terminal card ---------- */
+
+  .card{
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6);
+    overflow: hidden;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(16px);
+    animation: rise 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.8s;
+  }
+
+  .card-bar{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--panel-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .dot{ width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+  .dot--1{ background: #E5765F; opacity: 0.7; }
+  .dot--2{ background: var(--amber); opacity: 0.7; }
+  .dot--3{ background: var(--teal); opacity: 0.7; }
+  .card-bar-title{
+    margin-left: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .tabs{
+    position: relative;
+    display: flex;
+    padding: 6px 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab{
+    appearance: none;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 0.92rem;
+    font-weight: 500;
+    padding: 12px 4px;
+    margin-right: 22px;
+    cursor: pointer;
+  }
+  .tab.is-active{ color: var(--text); }
+  .tab-indicator{
+    position: absolute;
+    bottom: -1px;
+    left: 16px;
+    height: 2px;
+    background: var(--teal);
+    transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1), width 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .panel{
+    padding: 22px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .panel[hidden]{ display: none; }
+
+  .field{ display: flex; flex-direction: column; gap: 6px; }
+  .field-label{
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--teal);
+  }
+  .field input{
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    padding: 10px 12px;
+    border-radius: 6px;
+    transition: border-color 0.2s ease;
+  }
+  .field input::placeholder{ color: #4C5568; }
+  .field input:focus{ border-color: var(--teal); outline: none; }
+
+  .field-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .checkbox{ display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .checkbox input{ accent-color: var(--teal); }
+  .link{ color: var(--teal); text-decoration: none; }
+  .link:hover{ text-decoration: underline; }
+
+  .btn{
+    position: relative;
+    appearance: none;
+    border: none;
+    border-radius: 6px;
+    background: var(--teal);
+    color: #08130F;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .btn:hover{ background: #77E9D3; }
+  .btn:active{ transform: scale(0.98); }
+  .btn.is-loading span{ visibility: hidden; }
+  .btn.is-loading::after{
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 16px; height: 16px;
+    margin: -8px 0 0 -8px;
+    border-radius: 50%;
+    border: 2px solid rgba(8,19,15,0.35);
+    border-top-color: #08130F;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .card-footnote{
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    padding: 0 24px 22px;
+    margin: -6px 0 0;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+    .branches circle{ display: none; }
+    .blob{ animation: none; opacity: 0.1; }
+  }
+
+  @media (max-width: 420px){
+    .tab{ margin-right: 16px; font-size: 0.88rem; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="bg-scene" aria-hidden="true">
+    <div class="blob blob--teal"></div>
+    <div class="blob blob--amber"></div>
+    <svg class="branches" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <path class="teal" d="M -50 700 C 300 650, 500 750, 800 500 S 1300 250, 1650 300" />
+      <path class="amber" d="M -50 200 C 250 300, 450 150, 800 400 S 1250 650, 1650 600" />
+      <path class="teal" d="M -50 450 C 350 500, 600 350, 900 450 S 1350 500, 1650 450" />
+
+      <circle class="teal" r="4">
+        <animateMotion dur="16s" repeatCount="indefinite"
+          path="M -50 700 C 300 650, 500 750, 800 500 S 1300 250, 1650 300" />
+      </circle>
+      <circle class="amber" r="3.5">
+        <animateMotion dur="20s" repeatCount="indefinite"
+          path="M -50 200 C 250 300, 450 150, 800 400 S 1250 650, 1650 600" />
+      </circle>
+      <circle class="teal" r="3" opacity="0.8">
+        <animateMotion dur="13s" repeatCount="indefinite" begin="-4s"
+          path="M -50 450 C 350 500, 600 350, 900 450 S 1350 500, 1650 450" />
+      </circle>
+    </svg>
+  </div>
+
+  <main class="stage">
+    <div class="hero">
+      <div class="hero-icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" class="merge-icon">
+          <path class="merge-path" d="M14 19 C14 32, 32 32, 45 32" />
+          <path class="merge-path merge-path--b" d="M14 45 C14 32, 32 32, 45 32" />
+          <circle class="node" cx="14" cy="14" r="5" />
+          <circle class="node" cx="14" cy="50" r="5" />
+          <circle class="node" cx="50" cy="32" r="5" />
+        </svg>
+      </div>
+      <h1 class="hero-title"><span class="word">Welcome</span> <span class="word">everyone</span></h1>
+      <p class="hero-sub">Sign in to pick up your last commit, or create an account to open your first pull request.</p>
+    </div>
+
+    <section class="card" aria-labelledby="card-title">
+      <div class="card-bar">
+        <span class="dot dot--1"></span><span class="dot dot--2"></span><span class="dot dot--3"></span>
+        <span class="card-bar-title" id="card-title">forkline — welcome.sh</span>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab is-active" role="tab" aria-selected="true" data-tab="signin" type="button">Sign in</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="signup" type="button">Create account</button>
+        <span class="tab-indicator" aria-hidden="true"></span>
+      </div>
+
+      <form class="panel is-active" data-panel="signin" novalidate>
+        <label class="field">
+          <span class="field-label">$ email</span>
+          <input type="email" name="email" autocomplete="email" required placeholder="ada@college.edu" />
+        </label>
+        <label class="field">
+          <span class="field-label">$ password</span>
+          <input type="password" name="password" autocomplete="current-password" required placeholder="••••••••" />
+        </label>
+        <div class="field-row">
+          <label class="checkbox"><input type="checkbox" name="remember" /><span>Stay signed in</span></label>
+          <a class="link" href="#">Forgot password?</a>
+        </div>
+        <button class="btn" type="submit"><span>Sign in</span></button>
+      </form>
+
+      <form class="panel" data-panel="signup" novalidate hidden>
+        <label class="field">
+          <span class="field-label">$ full name</span>
+          <input type="text" name="name" autocomplete="name" required placeholder="Ada Lovelace" />
+        </label>
+        <label class="field">
+          <span class="field-label">$ email</span>
+          <input type="email" name="email" autocomplete="email" required placeholder="ada@college.edu" />
+        </label>
+        <label class="field">
+          <span class="field-label">$ password</span>
+          <input type="password" name="password" autocomplete="new-password" required placeholder="At least 8 characters" />
+        </label>
+        <button class="btn" type="submit"><span>Create account</span></button>
+      </form>
+
+      <p class="card-footnote">Forkline is built in the open — every commit welcome. <a href="#" class="link">View source</a></p>
+    </section>
+  </main>
+
+<script>
+  (function(){
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+    var panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+    var indicator = document.querySelector('.tab-indicator');
+
+    function moveIndicator(tab){
+      if(!tab) return;
+      indicator.style.width = tab.offsetWidth + 'px';
+      indicator.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
+    }
+
+    function activate(tab){
+      tabs.forEach(function(t){
+        var isActive = t === tab;
+        t.classList.toggle('is-active', isActive);
+        t.setAttribute('aria-selected', isActive);
+      });
+      panels.forEach(function(p){
+        var match = p.dataset.panel === tab.dataset.tab;
+        p.hidden = !match;
+        p.classList.toggle('is-active', match);
+      });
+      moveIndicator(tab);
+    }
+
+    tabs.forEach(function(t){ t.addEventListener('click', function(){ activate(t); }); });
+    window.addEventListener('load', function(){ moveIndicator(document.querySelector('.tab.is-active')); });
+    window.addEventListener('resize', function(){ moveIndicator(document.querySelector('.tab.is-active')); });
+
+    document.querySelectorAll('form.panel').forEach(function(f){
+      f.addEventListener('submit', function(e){
+        e.preventDefault();
+        var btn = f.querySelector('.btn');
+        btn.classList.add('is-loading');
+        setTimeout(function(){ btn.classList.remove('is-loading'); }, 1400);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
